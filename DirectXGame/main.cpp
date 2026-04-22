@@ -103,6 +103,29 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	    "main", "ps_5_0",                  // エントリーポイント名、シェーダーモデル指定
 	    D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION, // デバッグ用設定
 		0, &psBlob, &errorBlob);
+	if (FAILED(hr)) {
+	DebugText::GetInstance()->ConsolePrintf
+	(std::system_category().message(hr).c_str());
+		if (errorBlob) {
+		DebugText::GetInstance()->ConsolePrintf(
+			reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
+		}
+		assert(false);
+	}
+
+	// PSOの作成
+	D3D12_GRAPHICS_PIPELINE_STATE_DESC graphicsPipelineStateDesc{};
+	graphicsPipelineStateDesc.pRootSignature = rootSignature; // ルートシグネチャ
+	graphicsPipelineStateDesc.InputLayout = inputLayoutDesc;  // InputLayout
+	graphicsPipelineStateDesc.VS = {vsBlob->GetBufferPointer(), vsBlob->GetBufferSize()}; // vertexshader
+	graphicsPipelineStateDesc.PS = {psBlob->GetBufferPointer(), psBlob->GetBufferSize()}; // pixelshader
+	graphicsPipelineStateDesc.BlendState = blendDesc; // BlendState
+	graphicsPipelineStateDesc.RasterizerState = rasterizerDesc; // RasterizerState
+
+	// 書き込むRTVの情報
+	graphicsPipelineStateDesc.NumRenderTargets = 1; // 書き込むRTVの数
+	graphicsPipelineStateDesc.RTVFormats[0] = DXGI_FORMAT_R8G8B8A8_UNORM_SRGB; 
+	//利用するトポロジ
 
 
 	// メインループ
