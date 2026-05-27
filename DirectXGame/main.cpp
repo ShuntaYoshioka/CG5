@@ -143,10 +143,6 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// 頂点リソースのマップを解除する
 	vertexResource->Unmap(0, nullptr);
 
-
-
-
-
 	// メインループ
 	while (true) {
 		// エンジンの更新
