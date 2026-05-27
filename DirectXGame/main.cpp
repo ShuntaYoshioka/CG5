@@ -1,12 +1,9 @@
 #include <Windows.h>
 #include"KamataEngine.h"
 #include"Shader.h"
-//#include<d3dcompiler.h>
 
 using namespace KamataEngine;
 
-// 関数プロトタイプ宣言
-//ID3DBlob* CompileShader(const std::wstring& filePath, const std::string& shaderModel);
 
 // Windowsアプリでのエントリーポイント(main関数)
 int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
@@ -179,41 +176,9 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	graphicsPipelineState->Release();
 	signatureBlob ->Release();
 	rootSignature->Release();
-	//vsBlob->Release();
-	//psBlob->Release();
 
 
 	// エンジンの終了処理
 	KamataEngine::Finalize();
 	return 0;
 }
-
-
-//シェーダーコンパイル関数
-//   filePath : シェーダーファイルのパス : 例："Resources/Shaders/TestVS.hlsl"
-//  shaderModel : シェーダーモデル : 指定列（例："vs_5_0"）
-
-/* D3DBlob* CompileShader(const std::wstring& filePath, const std::string& shaderModel) {
-	ID3DBlob* shaderBlob = nullptr; 
-	ID3DBlob* errorBlob = nullptr; 
-
-	HRESULT hr = D3DCompileFromFile(
-		filePath.c_str(), 
-		nullptr, 
-		D3D_COMPILE_STANDARD_FILE_INCLUDE,
-		"main", 
-		shaderModel.c_str(),
-		D3DCOMPILE_DEBUG | D3DCOMPILE_SKIP_OPTIMIZATION,
-		0, &shaderBlob, &errorBlob);
-	//エラーが発生したら止める		
-	if (FAILED(hr)) {
-		if (errorBlob) {
-			OutputDebugStringA(reinterpret_cast<char*>(errorBlob->GetBufferPointer()));
-			errorBlob->Release();
-		}
-		assert(false);
-	}
-	//生成したshaderBlobを返す
-	return shaderBlob;
-}
-*/
