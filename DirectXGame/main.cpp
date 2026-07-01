@@ -60,10 +60,11 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 //	};
 
 	//画面全体を覆う
-	VertexData vertices[3] = {
-	    {{-1.0f, 3.0f, 0.0f, 1.0f}}, // 0: 上（画面のはるか上空）
-	    {{3.0f, -1.0f, 0.0f, 1.0f}}, // 1: 右下（画面のはるか右外）
-	    {{-1.0f, -1.0f, 0.0f, 1.0f}} // 2: 左下（画面の左下ぴったり）
+	VertexData vertices[4] = {
+	    {{-1.0f, 1.0f, 0.0f, 1.0f}}, // 0: 左上
+	    {{1.0f, 1.0f, 0.0f, 1.0f}},  // 1: 右上
+	    {{1.0f, -1.0f, 0.0f, 1.0f}}, // 2: 右下
+	    {{-1.0f, -1.0f, 0.0f, 1.0f}} // 3: 左下
 	};
 
 	// vertexResourceの作成
@@ -80,7 +81,8 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 	//頂点インデクスデータの準備
 	uint16_t indices[] = {
-		0, 1, 2,
+	    0, 1, 2, // 1枚目の三角形
+	    0, 2, 3  // 2枚目の三角形
 	};
 
 	IndexBuffer ib;
