@@ -52,12 +52,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	};
 
 	//頂点データの準備
+	//三角形
 	//VertexData vertices[3] = {
 	 //   {{0.0f, 0.5f, 0.0f, 1.0f}},   // 上
 	  //  {{0.5f, -0.5f, 0.0f, 1.0f}}, 
 	   // {{-0.5f, -0.5f, 0.0f, 1.0f}}
 //	};
 
+	//画面全体を覆う
 	VertexData vertices[3] = {
 	    {{-1.0f, 3.0f, 0.0f, 1.0f}}, // 0: 上（画面のはるか上空）
 	    {{3.0f, -1.0f, 0.0f, 1.0f}}, // 1: 右下（画面のはるか右外）
