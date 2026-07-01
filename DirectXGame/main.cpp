@@ -3,6 +3,7 @@
 #include"Shader.h"
 #include"RootSignature.h"
 #include"PipelineState.h"
+#include"VertexBuffer.h"
 
 using namespace KamataEngine;
 
@@ -45,45 +46,17 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	SetupPipelineState(pipelineState, rs, vs, ps);
 	
 	// vertexResourceの作成
-	//頂点リソース用のヒープの設定
-	D3D12_HEAP_PROPERTIES uploadHeapProperties{};
-	uploadHeapProperties.Type = D3D12_HEAP_TYPE_UPLOAD; // CPUから書き込むヒープ
-	// 頂点リソースの設定
-	D3D12_RESOURCE_DESC vertexResourceDesc{};
-	vertexResourceDesc.Dimension = D3D12_RESOURCE_DIMENSION_BUFFER; // バッファ
-	vertexResourceDesc.Width = sizeof(Vector4) * 3; //リソースのサイズ		今回はVector4を3頂点分
-	//バッファの場合はこれらは1
-	vertexResourceDesc.Height = 1;
-	vertexResourceDesc.DepthOrArraySize = 1;
-	vertexResourceDesc.MipLevels = 1;
-	vertexResourceDesc.SampleDesc.Count = 1;
-	//バッファの場合はこれにする決まり
-	vertexResourceDesc.Layout = D3D12_TEXTURE_LAYOUT_ROW_MAJOR;
-	// 実際にリソースを生成する
-	ID3D12Resource* vertexResource = nullptr;
-	HRESULT hr = dxCommon->GetDevice()->CreateCommittedResource(
-		&uploadHeapProperties, D3D12_HEAP_FLAG_NONE, 
-		&vertexResourceDesc, D3D12_RESOURCE_STATE_GENERIC_READ,
-		nullptr, IID_PPV_ARGS(&vertexResource));
-	assert(SUCCEEDED(hr));
-
-	// VertexBufferViewの作成
-	D3D12_VERTEX_BUFFER_VIEW vertexBufferView{};
-	// リソースの先頭アドレスから使う
-	vertexBufferView.BufferLocation = vertexResource->GetGPUVirtualAddress();
-	//使用するリソースのサイズは頂点3つ分のサイズ
-	vertexBufferView.SizeInBytes = sizeof(Vector4) * 3;
-	// 1つの頂点のサイズ
-	vertexBufferView.StrideInBytes = sizeof(Vector4);
+	VertexBuffer vb;
+	vb.Create(sizeof(Vector4) * 3, sizeof(Vector4));
 
 	//頂点リソースにデータを書き込む
 	Vector4* vertexData = nullptr;
-	vertexResource->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
+	vb.Get()->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
 	vertexData[0] = {-0.5f, -0.5f, 0.0f, 1.0f}; // 左下
 	vertexData[1] = {0.0f, 0.5f, 0.0f, 1.0f};   // 上
 	vertexData[2] = {0.5f, -0.5f, 0.0f, 1.0f};  // 右下
 	// 頂点リソースのマップを解除する
-	vertexResource->Unmap(0, nullptr);
+	//vb.Get()->Unmap(0, nullptr);
 
 	// メインループ
 	while (true) {
@@ -98,7 +71,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	//コマンドを積む
 		commandList->SetGraphicsRootSignature(rs.Get());
 		commandList->SetPipelineState(pipelineState.Get());
-		commandList->IASetVertexBuffers(0, 1, &vertexBufferView);
+		commandList->IASetVertexBuffers(0, 1, vb.GetView());
 
 		//トロポジの設定
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
@@ -110,7 +83,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	}
 
 	//解放処理
-	vertexResource->Release();
+	//vertexResource->Release();
 	//graphicsPipelineState->Release();
 	//signatureBlob ->Release();
 	//rootSignature->Release();
