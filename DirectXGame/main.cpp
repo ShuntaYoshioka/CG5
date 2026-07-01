@@ -4,6 +4,7 @@
 #include"RootSignature.h"
 #include"PipelineState.h"
 #include"VertexBuffer.h"
+#include"IndexBuffer.h"
 
 using namespace KamataEngine;
 
@@ -44,19 +45,52 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 	// PSOの作成
 	PipelineState pipelineState;
 	SetupPipelineState(pipelineState, rs, vs, ps);
-	
+
+	//リソース確保のため、頂点情報を柔軟に対応できるようにvertexData構造体を新たに作成
+	struct VertexData {
+		Vector4 position; 
+	};
+
+	//頂点データの準備
+	//VertexData vertices[3] = {
+	 //   {{0.0f, 0.5f, 0.0f, 1.0f}},   // 上
+	  //  {{0.5f, -0.5f, 0.0f, 1.0f}}, 
+	   // {{-0.5f, -0.5f, 0.0f, 1.0f}}
+//	};
+
+	VertexData vertices[3] = {
+	    {{-1.0f, 3.0f, 0.0f, 1.0f}}, // 0: 上（画面のはるか上空）
+	    {{3.0f, -1.0f, 0.0f, 1.0f}}, // 1: 右下（画面のはるか右外）
+	    {{-1.0f, -1.0f, 0.0f, 1.0f}} // 2: 左下（画面の左下ぴったり）
+	};
+
 	// vertexResourceの作成
 	VertexBuffer vb;
-	vb.Create(sizeof(Vector4) * 3, sizeof(Vector4));
+	vb.Create(sizeof(vertices), sizeof(vertices[0]));
 
-	//頂点リソースにデータを書き込む
-	Vector4* vertexData = nullptr;
-	vb.Get()->Map(0, nullptr, reinterpret_cast<void**>(&vertexData));
-	vertexData[0] = {-0.5f, -0.5f, 0.0f, 1.0f}; // 左下
-	vertexData[1] = {0.0f, 0.5f, 0.0f, 1.0f};   // 上
-	vertexData[2] = {0.5f, -0.5f, 0.0f, 1.0f};  // 右下
-	// 頂点リソースのマップを解除する
-	//vb.Get()->Unmap(0, nullptr);
+	// 頂点リソースにデータを書き込む
+	VertexData* pGpuVertices = nullptr;
+	vb.Get() ->Map(0,nullptr, reinterpret_cast<void**>(&pGpuVertices));
+
+	for (int i = 0; i < _countof(vertices); ++i) {
+		pGpuVertices[i] = vertices[i];
+	}
+
+	//頂点インデクスデータの準備
+	uint16_t indices[] = {
+		0, 1, 2,
+	};
+
+	IndexBuffer ib;
+	ib.Create(sizeof(indices), sizeof(indices[0]));
+
+	//頂点インデックスリソースにデータを書き込む
+	uint16_t* pGpuIndices = nullptr;
+	ib.Get()->Map(0, nullptr, reinterpret_cast<void**>(&pGpuIndices));
+
+	for (int i = 0; i < _countof(indices); ++i) {
+		pGpuIndices[i] = indices[i];
+	}
 
 	// メインループ
 	while (true) {
@@ -72,11 +106,13 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 		commandList->SetGraphicsRootSignature(rs.Get());
 		commandList->SetPipelineState(pipelineState.Get());
 		commandList->IASetVertexBuffers(0, 1, vb.GetView());
+		commandList->IASetIndexBuffer(ib.GetView());
 
 		//トロポジの設定
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
 		//頂点数。インデックス数、インデックスの開始位置、インデックスのオフセット
-		commandList->DrawInstanced(3, 1, 0, 0);
+		//commandList->DrawInstanced(3, 1, 0, 0);
+		commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0);
 
 		// 描画終了
 		dxCommon->PostDraw();
