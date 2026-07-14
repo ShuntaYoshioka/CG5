@@ -203,19 +203,16 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 			break;
 		}
 
-		// 描画処理
-		dxCommon->PreDraw();
-
 		// TransitionBarrierをSRV->RTVに変更する
 		D3D12_RESOURCE_BARRIER barrier{};
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION; // TransitionBarrier
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;//フラグはNONE
-		barrier.Transition.pResource = renderTextureResource;  // バリアを張る対象のリソース
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;                       // TransitionBarrier
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;                            // フラグはNONE
+		barrier.Transition.pResource = renderTextureResource;                        // バリアを張る対象のリソース
 		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE; // 変更前
-		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;// 変更後
+		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_RENDER_TARGET;          // 変更後
 		commandList->ResourceBarrier(1, &barrier);                                   // バリアを張る
 
-		//描画先のRTVとDSVを設定する
+		// 描画先のRTVとDSVを設定する
 		commandList->OMSetRenderTargets(1, &rtvhandleCPU, false, &dsvHandleCPU);
 
 		// Viewportの設定
@@ -231,7 +228,7 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		// ScissorRectの設定
 		D3D12_RECT scissorRect{};
-		//基本的にビューポートと同じ矩形が構成されるようにっする
+		// 基本的にビューポートと同じ矩形が構成されるようにっする
 		scissorRect.left = 0;
 		scissorRect.right = WinApp::kWindowWidth;
 		scissorRect.top = 0;
@@ -239,24 +236,29 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		commandList->RSSetScissorRects(1, &scissorRect);
 
-		//全画面クリア
+		// 全画面クリア
 		commandList->ClearRenderTargetView(rtvhandleCPU, kRenderTargetClearColor, 0, nullptr);
 		// 指定した深度で画面全体をクリアする
 		commandList->ClearDepthStencilView(dsvHandleCPU, D3D12_CLEAR_FLAG_DEPTH, 1.0f, 0, 0, nullptr);
 
-		//描画
-		//ここにゲームシーンの描画処理を書く
+		// 描画
+		// ここにゲームシーンの描画処理を書く
 
 		// TransitionBarrierをもとに戻す
-		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;               // TransitionBarrier
-		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;                    // フラグはNONE
-		barrier.Transition.pResource = renderTextureResource;                // バリアを張る対象のリソース
-		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET; // 変更前
+		barrier.Type = D3D12_RESOURCE_BARRIER_TYPE_TRANSITION;                      // TransitionBarrier
+		barrier.Flags = D3D12_RESOURCE_BARRIER_FLAG_NONE;                           // フラグはNONE
+		barrier.Transition.pResource = renderTextureResource;                       // バリアを張る対象のリソース
+		barrier.Transition.StateBefore = D3D12_RESOURCE_STATE_RENDER_TARGET;        // 変更前
 		barrier.Transition.StateAfter = D3D12_RESOURCE_STATE_PIXEL_SHADER_RESOURCE; // 変更後
 		commandList->ResourceBarrier(1, &barrier);                                  // バリアを張る
 
 
 
+
+		// 描画処理
+		dxCommon->PreDraw();
+
+		
 
 
 		// コマンドを積む
@@ -267,6 +269,14 @@ int WINAPI WinMain(_In_ HINSTANCE, _In_opt_ HINSTANCE, _In_ LPSTR, _In_ int) {
 
 		// トロポジの設定
 		commandList->IASetPrimitiveTopology(D3D_PRIMITIVE_TOPOLOGY_TRIANGLELIST);
+
+		// 使用するディスクリプタヒープの設定
+		commandList->SetDescriptorHeaps(srvDescriptorHeap->GetDesc().NumDescriptors, &srvDescriptorHeap);
+
+		// SRVのDescriptorTableの先頭を設定
+		commandList->SetGraphicsRootDescriptorTable(0, srvHandleGPU);
+
+
 		// 頂点数。インデックス数、インデックスの開始位置、インデックスのオフセット
 		// commandList->DrawInstanced(3, 1, 0, 0);
 		commandList->DrawIndexedInstanced(_countof(indices), 1, 0, 0, 0);
