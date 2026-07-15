@@ -7,6 +7,7 @@
 #include "WorldTransformEx.h"
 
 #include <Windows.h>
+#include <cassert>
 
 using namespace KamataEngine;
 
@@ -410,7 +411,7 @@ ID3D12Resource* CreateRenderTextureResource(ID3D12Device* device, uint32_t width
 
 	// 4.リソース生成
 	ID3D12Resource* resource = nullptr;
-	HRESULT hr = device->CreateCommittedResource(
+	[[maybe_unused]] HRESULT hr = device->CreateCommittedResource(
 	    &heapProperties,                    // ヒーププロパティ
 	    D3D12_HEAP_FLAG_NONE,               // ヒープフラグ
 	    &resourceDesc,                      // リソースの詳細設定
@@ -447,7 +448,7 @@ ID3D12Resource* CreateDepthStencilTextureResource(ID3D12Device* device, int32_t 
 
 	// 3.リソース生成
 	ID3D12Resource* resource = nullptr;
-	HRESULT hr = device->CreateCommittedResource(
+	[[maybe_unused]] HRESULT hr = device->CreateCommittedResource(
 	    &heapProperties,						
 	    D3D12_HEAP_FLAG_NONE,					
 	    &resourceDesc,							
